@@ -1,0 +1,17 @@
+INPUT(
+./debug\main.o
+./debug\mainwindow.o
+./debug\camera.o
+./debug\ekran.o
+./debug\light_source.o
+./debug\matrix.o
+./debug\model3d.o
+./debug\pixbuf.o
+./debug\renderer3d.o
+./debug\structures.o
+./debug\texture.o
+./debug\vertex.o
+./debug\world.o
+./debug\moc_mainwindow.o
+./debug\moc_ekran.o
+);

@@ -1,0 +1,15 @@
+# Blender MTL File: 'Oildrum.blend'
+# Material Count: 1
+newmtl Oildrum-ref
+Ns 96.078431
+Ka 0.2 0.2 0.2
+Kd 1 1 1
+Ks 1 1 1
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd oildrum_col.jpg
+map_Bump oildrum_nor.jpg
+
+
+# Ni - wsp zalamania swiatla, czy cos w tym rodzaju

@@ -1,0 +1,17 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\camera.o
+./release\ekran.o
+./release\light_source.o
+./release\matrix.o
+./release\model3d.o
+./release\pixbuf.o
+./release\renderer3d.o
+./release\structures.o
+./release\texture.o
+./release\vertex.o
+./release\world.o
+./release\moc_mainwindow.o
+./release\moc_ekran.o
+);
