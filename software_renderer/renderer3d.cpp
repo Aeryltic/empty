@@ -283,6 +283,7 @@ uint32_t treshold(uint32_t v) {
 }
 
 uint32_t Renderer3D::calc_color(float x, float y, float z, float tu, float tv, const arma::vec& n, const material &mtl) {
+    // x, y to punkty na ekranie
     // wektor n (normalny) musi być znormalizowany
     /*
         L_a - ambient,
@@ -307,8 +308,8 @@ uint32_t Renderer3D::calc_color(float x, float y, float z, float tu, float tv, c
     // TOTAL
         I = I_e + I_a + (I_d + I_s) / (a + b*d + c*d*d)
     */
-//    std::vector<light_source>& lights = world->lights;
-    if(world->lights.size()) { // na razie max 1 światło
+    static float a = 1, b = 0.001, c = 0.0001;
+    if(world->lights.size()) { // może warto się tego pozbyć?
         x -= center_x;
         y -= center_y;
 
@@ -317,38 +318,45 @@ uint32_t Renderer3D::calc_color(float x, float y, float z, float tu, float tv, c
 
         arma::vec v = arma::normalise(arma::vec{{-x}, {-y}, {-z}});
 
-        light_source& light = world->lights[0];
-        // light and reflection vectors
-        arma::vec l = arma::vec{{light.x - x}, {light.y - y}, {light.z - z}};
-        float dist2 = l[0] * l[0] + l[1] * l[1] + l[2] * l[2];
-        l = arma::normalise(l);
-        float dot_ln = arma::dot(l, n);
-        arma::vec r = arma::normalise(2 * dot_ln * n - l);
-        // obliczenia światła...
-        rgb ambient = mtl.ambient * light.ambient;
-        rgb diffuse(0, 0, 0);
-        rgb specular(0, 0, 0);
-        if(dot_ln > 0) {
-            diffuse = mtl.diffuse * dot_ln * light.diffuse;
-            float dot_rv = arma::dot(r, v);
-            if(dot_rv > 0) {
-                specular = mtl.specular * std::pow(dot_rv, mtl.ns) * light.specular;
+        rgb illumination = mtl.emission; // wynikowa iluminacja
+
+        for(unsigned i = 0; i < world->lights.size(); i++) {
+            light_source& light = world->lights[i];
+
+            arma::vec l = arma::vec{{light.x - x}, {light.y - y}, {light.z - z}};
+            float dist2 = l[0] * l[0] + l[1] * l[1] + l[2] * l[2];
+            float att = 1.0 / (a + b * std::sqrt(dist2) + c * dist2);
+
+            if(att > 1.0 / 255.0) {
+                l = arma::normalise(l);
+                arma::vec r = arma::normalise(-l - 2 * arma::dot(-l, n) * n);
+
+                rgb ambient = mtl.ambient * light.ambient;
+                rgb diffuse(0, 0, 0);
+                rgb specular(0, 0, 0);
+
+                float dot_ln = arma::dot(l, n);
+                if(dot_ln > 0) {
+                    diffuse = mtl.diffuse * dot_ln * light.diffuse;
+
+                    float dot_rv = arma::dot(r, v);
+                    if(dot_rv > 0) {
+                        specular = mtl.specular * std::pow(dot_rv, mtl.ns) * light.specular;
+                    }
+                }
+
+                illumination += (ambient + diffuse + specular) * att; // ?
             }
         }
 
-
-        float a = 1, b = 0.001, c = 0.0001;
-        float att = 1.0 / (a + b * std::sqrt(dist2) + c * dist2);
-        rgb illumination = mtl.emission + (ambient + diffuse + specular) * att;
-        // kolory
         uint32_t color = mtl.tex.get(tu, tv); // zamiast tu i tv brać po prostu kolor?
         uint32_t lr = treshold(((color >> 16) & 0xff) * illumination.r);
         uint32_t lg = treshold(((color >> 8) & 0xff) * illumination.g);
         uint32_t lb = treshold(((color) & 0xff) * illumination.b);
         return (color & (0xff << 24)) | lr << 16 | lg << 8 | lb;
     }
+    return mtl.tex.get(tu, tv); // tryb bez świateł
     //return 0xff000000;
-    return mtl.tex.get(tu, tv);
 }
 
 

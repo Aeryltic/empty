@@ -29,7 +29,7 @@ void World::load_assets()
     std::vector<std::string> filename = {
         "Handgun_obj.obj"
         //,"cube.obj"
-        //,"oildrum.obj"
+        //"oildrum.obj"
     };
 
 
@@ -42,4 +42,5 @@ void World::load_assets()
     }
 
     lights.push_back(light_source(0, 100, -50, rgb(1.0, 1.0, 1.0), rgb(1, 1, 1), rgb(1.0, 1.0, 1.0)));
+//    lights.push_back(light_source(-50, 100, -50, rgb(1.0, 1.0, 1.0), rgb(1, 1, 1), rgb(1.0, 1.0, 1.0)));
 }
