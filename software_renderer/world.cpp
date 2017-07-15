@@ -27,20 +27,36 @@ void World::load_model_from_file(const std::string &filename) {
 void World::load_assets()
 {
     std::vector<std::string> filename = {
-        "Handgun_obj.obj"
+        //"Handgun_obj.obj"
+        //"Street environment_V01.obj"
         //,"cube.obj"
         //"oildrum.obj"
+        //"amg.obj"
+        //"tree_oak.obj"
+        "table lamp.obj",
+        "chair.obj",
+        "table.obj",
+        "cube.obj"
     };
 
+    std::unordered_map<std::string, float> scale;
+    scale["table lamp.obj"] = 1;
+    scale["chair.obj"] = 50;
+    scale["table.obj"] = 50;
+    scale["cube.obj"] = 500;
 
     for(unsigned i=0; i< filename.size(); i++) {
         load_model_from_file(filename[i]);
-        models[i].scx = 50;
-        models[i].scy = 50;
-        models[i].scz = 50;
-        models[i].ty = 70;
+        if(scale.find(filename[i]) != scale.end()) {
+            float s = scale[filename[i]];
+             models[i].scx = s;
+             models[i].scy = s;
+             models[i].scz = s;
+        }
     }
 
-    lights.push_back(light_source(0, 100, -50, rgb(1.0, 1.0, 1.0), rgb(1, 1, 1), rgb(1.0, 1.0, 1.0)));
-//    lights.push_back(light_source(-50, 100, -50, rgb(1.0, 1.0, 1.0), rgb(1, 1, 1), rgb(1.0, 1.0, 1.0)));
+    lights.push_back(light_source(30, 70, 0, rgb(1, 1, 1), rgb(0.6, 0.1, 0.1), rgb(1.0, 1.0, 1.0), &models[0]));
+    //lights.push_back(light_source(0, -200, 0, rgb(1, 1, 1), rgb(0, 1, 0), rgb(1.0, 1.0, 1.0)));
+    //lights.push_back(light_source(0, 200, 0, rgb(1, 1, 1), rgb(0, 0, 1), rgb(1.0, 1.0, 1.0)));
+
 }

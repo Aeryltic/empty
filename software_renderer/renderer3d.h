@@ -28,6 +28,8 @@ private:
     float x_mult, y_mult;
     World *world; // updated on render
 
+    int calls;
+
 
     uint32_t calc_color(float x, float y, float z, float tu, float tv, const arma::vec& n, const material &mtl);
     void texture_bottom_tri(render_point v[], const material &mtl, const arma::vec &normal);
@@ -41,6 +43,7 @@ private:
     char cohen_sutherland_clipping(int &x0, int &y0, int &x1, int &y1);
 
     void draw_ellipse(int x, int y, double r1, double r2, double angle, uint32_t color, int s);
+    void clip_poly(std::vector<render_point> &poly);
 };
 
 #endif // RENDERER3D_H

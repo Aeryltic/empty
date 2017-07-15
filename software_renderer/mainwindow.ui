@@ -39,8 +39,8 @@
     <widget class="QSlider" name="trX">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>70</y>
+       <x>11</x>
+       <y>90</y>
        <width>251</width>
        <height>22</height>
       </rect>
@@ -54,12 +54,15 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="invertedAppearance">
+      <bool>true</bool>
+     </property>
     </widget>
     <widget class="QSlider" name="trY">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>110</y>
+       <x>11</x>
+       <y>120</y>
        <width>251</width>
        <height>22</height>
       </rect>
@@ -77,7 +80,7 @@
     <widget class="QSlider" name="trZ">
      <property name="geometry">
       <rect>
-       <x>10</x>
+       <x>11</x>
        <y>150</y>
        <width>251</width>
        <height>22</height>
@@ -96,8 +99,8 @@
     <widget class="QSlider" name="rotX">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>230</y>
+       <x>11</x>
+       <y>200</y>
        <width>251</width>
        <height>22</height>
       </rect>
@@ -112,8 +115,8 @@
     <widget class="QSlider" name="rotY">
      <property name="geometry">
       <rect>
-       <x>9</x>
-       <y>270</y>
+       <x>11</x>
+       <y>230</y>
        <width>251</width>
        <height>22</height>
       </rect>
@@ -128,8 +131,8 @@
     <widget class="QSlider" name="rotZ">
      <property name="geometry">
       <rect>
-       <x>9</x>
-       <y>310</y>
+       <x>11</x>
+       <y>260</y>
        <width>251</width>
        <height>22</height>
       </rect>
@@ -144,9 +147,9 @@
     <widget class="QSlider" name="shX">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>390</y>
-       <width>160</width>
+       <x>10</x>
+       <y>320</y>
+       <width>251</width>
        <height>22</height>
       </rect>
      </property>
@@ -163,9 +166,9 @@
     <widget class="QSlider" name="shY">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>430</y>
-       <width>160</width>
+       <x>10</x>
+       <y>350</y>
+       <width>251</width>
        <height>22</height>
       </rect>
      </property>
@@ -182,9 +185,9 @@
     <widget class="QSlider" name="shZ">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>470</y>
-       <width>160</width>
+       <x>10</x>
+       <y>380</y>
+       <width>251</width>
        <height>22</height>
       </rect>
      </property>
@@ -201,10 +204,10 @@
     <widget class="QLabel" name="label">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>40</y>
-       <width>47</width>
-       <height>13</height>
+       <x>17</x>
+       <y>70</y>
+       <width>81</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="text">
@@ -214,8 +217,8 @@
     <widget class="QLabel" name="label_2">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>200</y>
+       <x>20</x>
+       <y>180</y>
        <width>47</width>
        <height>13</height>
       </rect>
@@ -227,8 +230,8 @@
     <widget class="QLabel" name="label_3">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>360</y>
+       <x>20</x>
+       <y>300</y>
        <width>47</width>
        <height>13</height>
       </rect>
@@ -240,8 +243,8 @@
     <widget class="QLabel" name="label_4">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>530</y>
+       <x>20</x>
+       <y>410</y>
        <width>47</width>
        <height>13</height>
       </rect>
@@ -253,9 +256,9 @@
     <widget class="QSlider" name="scX">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>560</y>
-       <width>160</width>
+       <x>10</x>
+       <y>430</y>
+       <width>251</width>
        <height>22</height>
       </rect>
      </property>
@@ -272,9 +275,9 @@
     <widget class="QSlider" name="scY">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>600</y>
-       <width>160</width>
+       <x>10</x>
+       <y>460</y>
+       <width>251</width>
        <height>22</height>
       </rect>
      </property>
@@ -291,9 +294,9 @@
     <widget class="QSlider" name="scZ">
      <property name="geometry">
       <rect>
-       <x>50</x>
-       <y>640</y>
-       <width>160</width>
+       <x>10</x>
+       <y>490</y>
+       <width>251</width>
        <height>22</height>
       </rect>
      </property>
@@ -310,14 +313,97 @@
     <widget class="QSlider" name="nrSlider">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>10</y>
+       <x>11</x>
+       <y>40</y>
        <width>251</width>
        <height>22</height>
       </rect>
      </property>
      <property name="maximum">
       <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>20</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Model</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_10">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>530</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Light</string>
+     </property>
+    </widget>
+    <widget class="QSlider" name="lightA">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>550</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QSlider" name="lightB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>580</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>500</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QSlider" name="lightC">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>610</y>
+       <width>251</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <number>500</number>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

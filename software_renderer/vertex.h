@@ -2,6 +2,7 @@
 #define VERTEX_H
 
 #include <armadillo>
+#include "qdebug.h"
 
 struct vertex {
     float x, y, z; // w
@@ -38,10 +39,10 @@ struct vertex_normal {
     vertex_normal operator*(float v) const {
         return {x * v, y * v, z * v};
     }
-    vertex_normal operator+(const vertex_normal& other) {
+    vertex_normal operator+(const vertex_normal& other) const {
         return {x + other.x, y + other.y, z + other.z};
     }
-    vertex_normal operator-(const vertex_normal& other) {
+    vertex_normal operator-(const vertex_normal& other) const {
         return {x - other.x, y - other.y, z - other.z};
     }
 };
@@ -58,7 +59,13 @@ struct render_point {
     vertex_texture vt;
     vertex_normal vn;
 
-    static render_point interpolate(const render_point& a, const render_point& b, float alpha);
+    render_point operator*(float val) const {
+        return {x * val, y * val, v * val, vt * val, vn * val};
+    }
+    render_point operator+(const render_point& other) const {
+        qDebug("+");
+        return {x + other.x, y + other.y, v + other.v, vt + other.vt, vn + other.vn};
+    }
 };
 
 #endif // VERTEX_H

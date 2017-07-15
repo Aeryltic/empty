@@ -37,6 +37,10 @@ private:
     void set_sc_y(float v){ if(world->models.size()) world->models[model_nr - 1].scy = 1 + v/20; update(); }
     void set_sc_z(float v){ if(world->models.size()) world->models[model_nr - 1].scz = 1 + v/20; update(); }
 
+    void set_l_a(float v){ if(world->lights.size()) world->lights[0].att_a = 1 + v/20; update(); }
+    void set_l_b(float v){ if(world->lights.size()) world->lights[0].att_b = std::pow(1.0 / v, 2); update(); }
+    void set_l_c(float v){ if(world->lights.size()) world->lights[0].att_c = std::pow(1.0 / v, 3); update(); }
+
     void set_model_nr(int n){ this->model_nr = n; update(); }
 
     void keyPressEvent(QKeyEvent* event);

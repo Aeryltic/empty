@@ -70,12 +70,16 @@ model3d::model3d(std::stringstream& ss) : model3d() {
 
         } else if(type == "usemtl") {
             std::string mtl_name;
-            line_ss >> mtl_name;
+            //line_ss >> mtl_name;
+            line_ss >> std::ws;
+            getline(line_ss, mtl_name);
             qDebug("usemtl: %s", mtl_name.c_str());
             curr_mtl = get_mtl_index(mtl_name);
         } else if(type == "mtllib") {
             std::string filename;
-            line_ss >> filename;
+            //line_ss >> filename;
+            line_ss >> std::ws;
+            getline(line_ss, filename);
             std::ifstream file(filename);
             if(file) {
                 qDebug("mtl file ok: %s", filename.c_str());
@@ -83,6 +87,8 @@ model3d::model3d(std::stringstream& ss) : model3d() {
                 buffer << file.rdbuf();
                 load_mtl(buffer);
                 file.close();
+            } else {
+                qDebug("mtl file NOT ok: %s", filename.c_str());
             }
 
         } /*else if(type == "#"){
@@ -105,12 +111,16 @@ void model3d::load_mtl(std::stringstream& mtl_ss) {
         line_ss >> type;
         if(type == "newmtl") {
             std::string mtl_name;
-            line_ss >> mtl_name;
+            //line_ss >> mtl_name;
+            line_ss >> std::ws;
+            getline(line_ss, mtl_name);
             curr_mtl = get_mtl_index(mtl_name);
             qDebug("newmtl: %s (%u)", mtl_name.c_str(), curr_mtl);
         } else if(type == "map_Kd") {
             std::string tex_path;
-            line_ss >> tex_path;
+            //line_ss >> tex_path;
+            line_ss >> std::ws;
+            getline(line_ss, tex_path);
             if(mtls[curr_mtl].tex.load_from_file(tex_path.c_str())) {
                 qDebug("tex loaded: %s (%u)", tex_path.c_str(), curr_mtl);
             } else {
