@@ -36,7 +36,7 @@ void World::load_assets()
         "table lamp.obj",
         "chair.obj",
         "table.obj",
-        "cube.obj"
+        //"cube.obj"
     };
 
     std::unordered_map<std::string, float> scale;
@@ -49,13 +49,13 @@ void World::load_assets()
         load_model_from_file(filename[i]);
         if(scale.find(filename[i]) != scale.end()) {
             float s = scale[filename[i]];
-             models[i].scx = s;
-             models[i].scy = s;
-             models[i].scz = s;
+            models[i].scx = s;
+            models[i].scy = s;
+            models[i].scz = s;
         }
     }
 
-    lights.push_back(light_source(30, 70, 0, rgb(1, 1, 1), rgb(0.6, 0.1, 0.1), rgb(1.0, 1.0, 1.0), &models[0]));
+    lights.push_back(light_source(30, 70, 0, rgb(1, 1, 1), rgb(1, 1 ,1), rgb(1, 1, 1), &models[0]));
     //lights.push_back(light_source(0, -200, 0, rgb(1, 1, 1), rgb(0, 1, 0), rgb(1.0, 1.0, 1.0)));
     //lights.push_back(light_source(0, 200, 0, rgb(1, 1, 1), rgb(0, 0, 1), rgb(1.0, 1.0, 1.0)));
 

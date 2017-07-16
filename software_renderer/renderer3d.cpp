@@ -24,14 +24,15 @@ Renderer3D::Renderer3D(int width, int height, uint32_t base_color) : width(width
 }
 
 
-struct FaceComp {
-    float* fz;
-    FaceComp(float* fz) : fz(fz) { }
+struct Comp {
+    float* z;
+    Comp(float* fz) : z(fz) { }
     bool operator()(unsigned i, unsigned j) {
-        return fz[i] < fz[j];
+        return z[i] < z[j];
     }
 };
 
+/*
 void Renderer3D::render(World* world) {
     calls = 0;
     this->world = world;
@@ -86,12 +87,12 @@ void Renderer3D::render(World* world) {
             face& fc = model.fs[f];
             unsigned vertex_count = fc.size();
             fz[f] = 0;
-            for(int i=0; i<vertex_count; i++) {
+            for(unsigned i=0; i<vertex_count; i++) {
                 fz[f] += v[fc.vs_id[i]][2];
             }
             fz[f] /= vertex_count;
         }
-        std::sort(order, order + total_faces, FaceComp(fz));
+        std::sort(order, order + total_faces, Comp(fz));
         delete [] fz;
 
         // rysowanie
@@ -99,35 +100,45 @@ void Renderer3D::render(World* world) {
             face& fc = model.fs[order[f]];
             material& mtl = model.mtls[fc.mtl_id];
             unsigned vertex_count = fc.size();
-//            std::vector<render_point> poly(vertex_count-1);
-//            for(unsigned i=1; i<vertex_count; i++) {
-//                unsigned v_id = fc.vs_id[i],
-//                         vt_id = fc.vts_id[i],
-//                         vn_id = fc.vns_id[i];
-//                poly.push_back({x[v_id], y[v_id], v[v_id], model.vts[vt_id], model.vns[vn_id]});
-//                qDebug("%f %f %f", v[vt_id][0], v[vt_id][1], v[vt_id][2]);
-//            }
-//            //clip_poly(poly);
-//            for(unsigned i = 1; i < poly.size() - 1; i++) {
-//                arma::vec normal = arma::normalise(arma::cross((poly[0].v - poly[i].v), (poly[i].v - poly[i+1].v)));
-//                if(arma::dot(-poly[0].v, normal) >= 0) { // back-face culling
-//                    render_point rpts[3] = {poly[0], poly[i], poly[i+1]};
+
+            // v1
+//            unsigned v0 = fc.vs_id[0];
+//            for(unsigned i=1; i<vertex_count-1; i++) {
+//                unsigned v1 = fc.vs_id[i], v2 = fc.vs_id[i+1];
+//                if(v[v0][2] <= near || v[v1][2] <= near || v[v2][2] <= near) continue;
+//                arma::vec normal = arma::normalise(arma::cross((v[v0]-v[v1]), (v[v1]-v[v2])));
+//                if(arma::dot(-v[v0], normal) >= 0) { // back-face culling
+//                    render_point rpts[3] = {
+//                        {x[v0], y[v0], v[v0], model.vts[fc.vts_id[0]], model.vns[fc.vns_id[0]]},
+//                        {x[v1], y[v1], v[v1], model.vts[fc.vts_id[i]], model.vns[fc.vns_id[i]]},
+//                        {x[v2], y[v2], v[v2], model.vts[fc.vts_id[i+1]], model.vns[fc.vns_id[i+1]]}
+//                    };
 //                    draw_textured_triangle(rpts, mtl, normal);
 //                }
 //            }
 
-            unsigned v0 = fc.vs_id[0];
-            for(unsigned i=1; i<vertex_count-1; i++) {
-                unsigned v1 = fc.vs_id[i], v2 = fc.vs_id[i+1];
-                if(v[v0][2] <= near || v[v1][2] <= near || v[v2][2] <= near) continue;
-                arma::vec normal = arma::normalise(arma::cross((v[v0]-v[v1]), (v[v1]-v[v2])));
-                if(arma::dot(-v[v0], normal) >= 0) { // back-face culling
-                //if(normal[2] <= 0) {
-                    render_point rpts[3] = {
-                        {x[v0], y[v0], v[v0], model.vts[fc.vts_id[0]], model.vns[fc.vns_id[0]]},
-                        {x[v1], y[v1], v[v1], model.vts[fc.vts_id[i]], model.vns[fc.vns_id[i]]},
-                        {x[v2], y[v2], v[v2], model.vts[fc.vts_id[i+1]], model.vns[fc.vns_id[i+1]]}
-                    };
+            // v2
+            std::vector<render_point> poly;
+            for(unsigned i=0; i<vertex_count; i++) {
+                //qDebug("%u", i);
+                unsigned v_id = fc.vs_id[i],
+                         vt_id = fc.vts_id[i],
+                         vn_id = fc.vns_id[i];
+                poly.push_back({x[v_id], y[v_id], v[v_id], model.vts[vt_id], model.vns[vn_id]});
+                //qDebug("%f %f %f", v[v_id][0], v[v_id][1], v[v_id][2]);
+            }
+            clip_poly(poly);
+//            qDebug("poly size: %u", poly.size());
+//            for(unsigned i = 0; i < poly.size(); i++) {
+//                qDebug("%u, %u", poly[i].v.n_cols, poly[i].v.n_rows);
+//            }
+            int poly_size = poly.size();
+            if(poly[0].v[2] <= near) continue;
+            for(int i = 1; i < poly_size - 1; i++) {
+                if(poly[i].v[2] <= near || poly[i].v[i+1] <= near) continue;
+                arma::vec normal = arma::normalise(arma::cross((poly[0].v - poly[i].v), (poly[i].v - poly[i+1].v)));
+                if(arma::dot(-poly[0].v, normal) >= 0) { // back-face culling
+                    render_point rpts[3] = {poly[0], poly[i], poly[i+1]};
                     draw_textured_triangle(rpts, mtl, normal);
                 }
             }
@@ -156,23 +167,147 @@ void Renderer3D::render(World* world) {
 
     //qDebug("calls: %u", calls);
 }
-
-/*
-struct face_s {
-    unsigned id;
-    float z;
-};
-
-void sort_faces(int* face_ids, float* zs, std::vector<face>& faces) {
-// face_ids - tablica o rozmiarze faces.size() + 1
-    face_s* face_z = new face_s[faces.size() + 1];
-    for(unsigned i = 1; i < faces.size(); i++) {
-        face_z->id = i;
-        face_z->z = zs
-    }
-    delete [] face_z;
-}
 */
+
+void Renderer3D::render_v2(World* world) {
+    calls = 0;
+    this->world = world;
+    //qDebug("rendering");
+    pixBuf.clear();
+    pixBuf.clear_zbuf(far);
+
+    arma::mat viewport_transform = //matrix::clip_matrix(aspect, fov, near, far) *
+            //matrix::head_camera(world->cam);
+            matrix::anchored_camera(world->cam);
+
+     // obliczenie pozycji świateł
+    for(unsigned i=0; i<world->lights.size(); i++) {
+        light_source& light = world->lights[i];
+        arma::mat transform = viewport_transform;
+        if(light.parent) transform *= matrix::local_transform(*light.parent);
+        arma::vec pos = transform * arma::vec{{light.real_x}, {light.real_y}, {light.real_z}, {1}};
+        world->lights[i].x = pos[0];
+        world->lights[i].y = pos[1];
+        world->lights[i].z = pos[2];
+    }
+
+    // malarz
+    unsigned model_count = world->models.size();
+    unsigned* model_order = new unsigned[model_count];
+    float* model_z = new float[model_count];
+    for(unsigned i=0; i < model_count; i++) {
+        model_order[i] = i;
+        model_z[i] = arma::vec(viewport_transform * arma::vec{{world->models[i].tx}, {world->models[i].ty}, {world->models[i].tz}, {1}})[2];
+    }
+    std::sort(model_order, model_order + model_count, Comp(model_z));
+    delete [] model_z;
+
+    for(unsigned m=0; m<model_count; m++) {
+
+        model3d& model = world->models[model_order[m]];
+        arma::mat global_transform = viewport_transform * matrix::local_transform(model);
+
+        unsigned total_vertices = model.vs.size();
+        arma::vec* v = new arma::vec[total_vertices];
+        float* x = new float[total_vertices];
+        float* y = new float[total_vertices];
+
+        // transformacje
+        for(unsigned i=1; i<total_vertices; i++) {
+            v[i] = global_transform * arma::vec{{model.vs[i].x}, {model.vs[i].y}, {model.vs[i].z}, {1}};
+            v[i].shed_row(3); // do back-face cullingu
+            // punkt na ekranie
+            x[i] = ((v[i][0] / v[i][2])) * x_mult;
+            y[i] = ((v[i][1] / v[i][2])) * y_mult;
+
+            x[i] += center_x;
+            y[i] += center_y;
+        }
+
+        // "malarz"
+        unsigned total_faces = model.fs.size();
+        float* fz = new float[total_faces];\
+        unsigned* order = new unsigned[total_faces];
+        for(unsigned f=0; f<total_faces; f++) {
+            order[f] = f;
+            face& fc = model.fs[f];
+            unsigned vertex_count = fc.size();
+            fz[f] = 0;
+            for(unsigned i=0; i<vertex_count; i++) {
+                fz[f] += v[fc.vs_id[i]][2];
+            }
+            fz[f] /= vertex_count;
+        }
+        std::sort(order, order + total_faces, Comp(fz));
+        delete [] fz;
+
+        // rysowanie
+        for(unsigned f=0; f<total_faces; f++) {
+            face& fc = model.fs[order[f]];
+            material& mtl = model.mtls[fc.mtl_id];
+            unsigned vertex_count = fc.size();
+
+            // v1
+            unsigned v0 = fc.vs_id[0];
+            for(unsigned i=1; i<vertex_count-1; i++) {
+                unsigned v1 = fc.vs_id[i], v2 = fc.vs_id[i+1];
+                if(v[v0][2] <= near || v[v1][2] <= near || v[v2][2] <= near) continue;
+                arma::vec normal = arma::normalise(arma::cross((v[v0]-v[v1]), (v[v1]-v[v2])));
+                if(arma::dot(-v[v0], normal) >= 0) { // back-face culling
+                    render_point rpts[3] = {
+                        {x[v0], y[v0], v[v0], model.vts[fc.vts_id[0]], model.vns[fc.vns_id[0]]},
+                        {x[v1], y[v1], v[v1], model.vts[fc.vts_id[i]], model.vns[fc.vns_id[i]]},
+                        {x[v2], y[v2], v[v2], model.vts[fc.vts_id[i+1]], model.vns[fc.vns_id[i+1]]}
+                    };
+                    draw_textured_triangle(rpts, mtl, normal);
+                }
+            }
+
+            // v2
+//            std::vector<render_point> poly;
+//            for(unsigned i=0; i<vertex_count; i++) {
+//                unsigned v_id = fc.vs_id[i],
+//                         vt_id = fc.vts_id[i],
+//                         vn_id = fc.vns_id[i];
+//                poly.push_back({x[v_id], y[v_id], v[v_id], model.vts[vt_id], model.vns[vn_id]});
+//            }
+//            clip_poly(poly);
+//            int poly_size = poly.size();
+//            //if(poly[0].v[2] <= near) continue;
+//            for(int i = 1; i < poly_size - 1; i++) {
+//                //if(poly[i].v[2] <= near || poly[i].v[i+1] <= near) continue;
+//                arma::vec normal = arma::normalise(arma::cross((poly[0].v - poly[i].v), (poly[i].v - poly[i+1].v)));
+//                if(arma::dot(-poly[0].v, normal) >= 0) { // back-face culling
+//                    render_point rpts[3] = {poly[0], poly[i], poly[i+1]};
+//                    draw_textured_triangle(rpts, mtl, normal);
+//                }
+//            }
+        }
+
+        delete [] v;
+        delete [] x;
+        delete [] y;
+        delete [] order;
+    }
+    delete [] model_order;
+
+    // okręgi oznaczające źródło światła
+    for(unsigned i=0; i < world->lights.size(); i++) {
+        light_source& light = world->lights[i];
+        if(light.z < near || light.z > far) continue;
+
+        float x = ((light.x / light.z)) * x_mult;
+        float y = ((light.y / light.z)) * y_mult;
+
+        x += center_x;
+        y += center_y;
+
+        float r = 20 * (1 - (light.z - near) / float(far - near));
+        draw_ellipse(x, y, r, r, 0, 0xffffffff, 16);
+    }
+
+    //qDebug("calls: %u", calls);
+}
 
 void Renderer3D::draw_textured_triangle(render_point v[3], const material& mtl, const arma::vec& normal) {
 
@@ -268,20 +403,18 @@ void Renderer3D::texture_top_tri(render_point v[3], const material& mtl, const a
             float alpha = (x - lx) * reciprocal;
             float z = 1.0 / (lz * (1.0 - alpha) + rz * alpha);
             int iy = y + 0.5, ix = x + 0.5;
-            //if(is_inside(ix, iy)) {
-                int i = iy * width + ix;
-                if((z < pixBuf.z_buf[i]) && (z >= near)) {
-                    vertex_texture vt = ltv * (1.0 - alpha) +  rtv * alpha;
-                    float u = vt.u * z;
-                    float v = vt.v * z;
-                    if(u < 0)u = 0;
-                    if(u > 1)u = 1;
-                    if(v < 0)v = 0;
-                    if(v > 1)v = 1;
-                    pixBuf.buf[i] = calc_color(ix, iy, z, u, v, normal, mtl);
-                    pixBuf.z_buf[i] = z;
-                }
-            //}
+            int i = iy * width + ix;
+            if((z < pixBuf.z_buf[i]) && (z >= near)) {
+                vertex_texture vt = ltv * (1.0 - alpha) +  rtv * alpha;
+                float u = vt.u * z;
+                float v = vt.v * z;
+                if(u < 0)u = 0;
+                if(u > 1)u = 1;
+                if(v < 0)v = 0;
+                if(v > 1)v = 1;
+                pixBuf.buf[i] = calc_color(ix, iy, z, u, v, normal, mtl);
+                pixBuf.z_buf[i] = z;
+            }
         }
 
         lx += ldx;
@@ -336,20 +469,18 @@ void Renderer3D::texture_bottom_tri(render_point v[3], const material& mtl, cons
             float alpha = (x - lx) * reciprocal;
             float z = 1.0 / (lz * (1 - alpha) + rz * alpha);
             int iy = y + 0.5, ix = x + 0.5;
-            //if(is_inside(ix, iy)) {
-                int i = iy * width + ix;
-                if((z < pixBuf.z_buf[i]) && (z >= near)) {
-                    vertex_texture vt = ltv * (1.0 - alpha) +  rtv * alpha;
-                    float u = vt.u * z;
-                    float v = vt.v * z;
-                    if(u < 0)u = 0;
-                    if(u > 1)u = 1;
-                    if(v < 0)v = 0;
-                    if(v > 1)v = 1;
-                    pixBuf.buf[i] = calc_color(ix, iy, z, u, v, normal, mtl);
-                    pixBuf.z_buf[i] = z;
-                }
-            //}
+            int i = iy * width + ix;
+            if((z < pixBuf.z_buf[i]) && (z >= near)) {
+                vertex_texture vt = ltv * (1.0 - alpha) +  rtv * alpha;
+                float u = vt.u * z;
+                float v = vt.v * z;
+                if(u < 0)u = 0;
+                if(u > 1)u = 1;
+                if(v < 0)v = 0;
+                if(v > 1)v = 1;
+                pixBuf.buf[i] = calc_color(ix, iy, z, u, v, normal, mtl);
+                pixBuf.z_buf[i] = z;
+            }
         }
 
         lx += ldx;
@@ -359,7 +490,72 @@ void Renderer3D::texture_bottom_tri(render_point v[3], const material& mtl, cons
 
     }
 }
+/*
+void Renderer3D::bresenham_tri_tex(render_point v[3], const material& mtl, const arma::vec& normal) {
 
+    bool lchanged = false;
+    bool rchanged = false;
+
+    int lx = v[1].x;
+    int ly = v[1].y;
+    int rx = v[2].x;
+    int ry = v[2].y;
+
+    int ldx = abs(ax - tx);
+    int ldy = abs(my - ty);
+    int rdx = abs(bx - tx);
+    int rdy = abs(my - ty);
+
+    int lsignx = sgn(ax - tx);
+    int rsignx = sgn(bx - tx);
+    int signy = sgn(my - ty);
+
+    if(ldy > ldx) {
+        std::swap(ldx, ldy);
+        lchanged = true;
+    }
+    if(rdy > rdx) {
+        std::swap(rdx, rdy);
+        rchanged = true;
+    }
+
+    int le = 2 * ldy - ldx;
+    int re = 2 * rdy - rdx;
+    //---------------------------------
+    float ldz = float(az - tz) / ldx;
+    float lz = tz;
+    float rdz = float(bz - tz) / rdx;
+    float rz = tz;
+    //---------------------------------
+    int li=0, ri=0;
+    //int y = ty;
+    int w = ly;
+    while(w > my) {
+        int y = ly;
+        while((y==ly)&&(li<ldx)){
+            uchar c = 0xff * (1.0 - lz / far);
+            uint32_t color = 0xff << 24 | c << 16 | c << 8 | c;
+            set_pixel(lx, ly, lz, color);
+            bresenham_next_pixel(lx, ly, ldx, ldy, lsignx, signy, le, lchanged);
+            //qDebug("l: %d, %d", lx, ly);
+            lz += ldz;
+            li++;
+        }
+        y = ry;
+        while((y==ry)&&(ri<rdx)) {
+            uchar c = 0xff * (1.0 - rz / far);
+            uint32_t color = 0xff << 24 | c << 16 | c << 8 | c;
+            set_pixel(rx, ry, rz, color);
+            bresenham_next_pixel(rx, ry, rdx, rdy, rsignx, signy, re, rchanged);
+            //qDebug("r: %d, %d", lx, ly);
+            ri++;
+            rz += rdz;
+        }
+        bresenham3d(lx, ly, lz, rx, ry, rz);
+        w--;
+    }
+}
+*/
 uint32_t treshold(uint32_t v) {
     return v > 255 ? 255 : v;
 }
@@ -614,7 +810,7 @@ inline void bresenham_next_pixel(int& x, int& y, int& dx, int& dy, int& signx, i
 
 render_point intersection(render_point s, render_point e, vec2d a, vec2d b) {
     float d1 = ((b.y-a.y)*(e.x-s.x)-(e.y-s.y)*(b.x-a.x)),
-            d2 = ((e.y-s.y)*(b.x-a.x)-(b.y-a.y)*(e.x-s.x));
+          d2 = ((e.y-s.y)*(b.x-a.x)-(b.y-a.y)*(e.x-s.x));
     //if((abs(d1) > 0.001) && (abs(d2) > 0.001)) {
     float x=((b.x-a.x)*(e.x*s.y-e.y*s.x)-(e.x-s.x)*(b.x*a.y-b.y*a.x))/d1;
     float y=((e.y-s.y)*(b.x*a.y-b.y*a.x)-(b.y-a.y)*(e.x*s.y-e.y*s.x))/d2;
@@ -628,12 +824,12 @@ render_point intersection(render_point s, render_point e, vec2d a, vec2d b) {
 }
 
 void Renderer3D::clip_poly(std::vector<render_point>& poly) {
-    vec2d clipping_rect[4] = {{0,0}, {width-1, 0}, {width-1, height-1}, {0, height-1}};
-    for(int i = 0; i < 4; i++) {
+    if(poly.size() <= 2) return;
+    vec2d clipping_rect[4] = {{0,0}, {float(width-1), 0.0}, {float(width-1), float(height-1)}, {0.0, float(height-1)}};
+    for(int i = 0; (i < 4) && !poly.empty(); i++) {
         vec2d a = clipping_rect[i], b = clipping_rect[(i+1)%4];
-        //arma::vec clipping_edge{{b.x - a.x}, {b.y - a.y}};
         arma::vec clipping_edge{{b.x - a.x}, {b.y - a.y}, {0}};
-        std::vector<render_point> input(poly);
+        std::vector<render_point> input = poly;
         poly.clear();
         render_point s = input.back();
         for(render_point& e : input) {

@@ -18,6 +18,7 @@ public:
     int get_width() { return width; }
     int get_height() { return height; }
 
+    void render_v2(World *world);
 private:
     int width, height;
     PixBuf pixBuf;
@@ -44,6 +45,8 @@ private:
 
     void draw_ellipse(int x, int y, double r1, double r2, double angle, uint32_t color, int s);
     void clip_poly(std::vector<render_point> &poly);
+
+    void bresenham_tri_tex(render_point v[3], const material& mtl, const arma::vec& normal);
 };
 
 #endif // RENDERER3D_H

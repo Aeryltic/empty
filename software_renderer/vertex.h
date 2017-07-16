@@ -63,7 +63,7 @@ struct render_point {
         return {x * val, y * val, v * val, vt * val, vn * val};
     }
     render_point operator+(const render_point& other) const {
-        qDebug("+");
+        //qDebug("+");
         return {x + other.x, y + other.y, v + other.v, vt + other.vt, vn + other.vn};
     }
 };

@@ -1,16 +1,24 @@
-# 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
-# File Created: 21.12.2012 22:12:52
+# Blender MTL File: 'lamp.blend'
+# Material Count: 2
 
 newmtl OBJ_Table_Lamp_Tpage
-	Ns 10.0000
-	Ni 1.5000
-	d 1.0000
-	Tr 0.0000
-	Tf 1.0000 1.0000 1.0000 
-	illum 2
-	Ka 0.5880 0.5880 0.5880
-	Kd 0.5880 0.5880 0.5880
-	Ks 0.0000 0.0000 0.0000
-	Ke 0.0000 0.0000 0.0000
-	map_Ka textures\OBJ_Table_Lamp_D.png
-	map_Kd textures\OBJ_Table_Lamp_D.png
+Ns 7.843137
+Ka 0.5 0.5 0.5
+Kd 0.470400 0.470400 0.470400
+Ks 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd textures\OBJ_Table_Lamp_D.png
+map_Ka textures\\OBJ_Table_Lamp_D.png
+
+newmtl light_bulb
+Ns 96.078431
+Ke 10 10 10
+Ka 1 1 1
+Kd 0 0 0
+Ks 0 0 0
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd textures\OBJ_Table_Lamp_D.png

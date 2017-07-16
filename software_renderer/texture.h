@@ -18,7 +18,7 @@ struct texture {
 
     uint32_t get(float u, float v) const { // w przedziale [0, 1]
         int x = (u) * (width - 1),
-            y = (1 - v) * (height - 1); // dlaczego są odwrócone?
+            y = (1 - v) * (height - 1);
         return buf[y * width + x];
     }
 };

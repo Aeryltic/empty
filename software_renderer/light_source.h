@@ -5,7 +5,7 @@
 #include "model3d.h"
 
 struct light_source {
-    float real_x, real_y, real_z; // rzeczywiste pozycje
+    float real_x, real_y, real_z; // rzeczywiste pozycje (lub wzgl parenta)
     float x, y, z; // wzgl kamery
 
     rgb ambient;

@@ -26,7 +26,7 @@ void Ekran::paintEvent(QPaintEvent *event) {
     QPainter p(this);
     //p.fillRect(0, 0, width(), height(), Qt::white);
     if(world)
-        renderer.render(world);
+        renderer.render_v2(world);
     QImage im((uchar*)renderer.get_buffer(), width, height, QImage::Format_ARGB32);
     p.drawImage(0,0,im);
 }
