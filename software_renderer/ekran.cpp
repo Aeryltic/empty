@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stack>
 
-using namespace std;
+//using namespace std;
 Ekran::Ekran(QWidget *parent) : QWidget(parent), width(1280), height(720), renderer(width, height, 0xff000000) {
     pressed = false;
     world = nullptr;

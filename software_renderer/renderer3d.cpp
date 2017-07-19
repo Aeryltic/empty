@@ -32,11 +32,12 @@ struct Comp {
     }
 };
 
-/*
-void Renderer3D::render(World* world) {
-    calls = 0;
-    this->world = world;
+void Renderer3D::render_v2(World* world) {
     //qDebug("rendering");
+
+    //calls = 0;
+    this->world = world;
+
     pixBuf.clear();
     pixBuf.clear_zbuf(far);
 
@@ -56,143 +57,8 @@ void Renderer3D::render(World* world) {
     }
 
     unsigned model_count = world->models.size();
-    for(unsigned m=0; m<model_count; m++) {
-
-        model3d& model = world->models[m];
-        arma::mat global_transform = viewport_transform * matrix::local_transform(model);
-
-        unsigned total_vertices = model.vs.size();
-        arma::vec* v = new arma::vec[total_vertices];
-        float* x = new float[total_vertices];
-        float* y = new float[total_vertices];
-
-        // transformacje
-        for(unsigned i=1; i<total_vertices; i++) {
-            v[i] = global_transform * arma::vec{{model.vs[i].x}, {model.vs[i].y}, {model.vs[i].z}, {1}};
-            v[i].shed_row(3); // do back-face cullingu
-            // punkt na ekranie
-            x[i] = ((v[i][0] / v[i][2])) * x_mult;
-            y[i] = ((v[i][1] / v[i][2])) * y_mult;
-
-            x[i] += center_x;
-            y[i] += center_y;
-        }
-
-        // "malarz"
-        unsigned total_faces = model.fs.size();
-        float* fz = new float[total_faces];\
-        unsigned* order = new unsigned[total_faces];
-        for(unsigned f=0; f<total_faces; f++) {
-            order[f] = f;
-            face& fc = model.fs[f];
-            unsigned vertex_count = fc.size();
-            fz[f] = 0;
-            for(unsigned i=0; i<vertex_count; i++) {
-                fz[f] += v[fc.vs_id[i]][2];
-            }
-            fz[f] /= vertex_count;
-        }
-        std::sort(order, order + total_faces, Comp(fz));
-        delete [] fz;
-
-        // rysowanie
-        for(unsigned f=0; f<total_faces; f++) {
-            face& fc = model.fs[order[f]];
-            material& mtl = model.mtls[fc.mtl_id];
-            unsigned vertex_count = fc.size();
-
-            // v1
-//            unsigned v0 = fc.vs_id[0];
-//            for(unsigned i=1; i<vertex_count-1; i++) {
-//                unsigned v1 = fc.vs_id[i], v2 = fc.vs_id[i+1];
-//                if(v[v0][2] <= near || v[v1][2] <= near || v[v2][2] <= near) continue;
-//                arma::vec normal = arma::normalise(arma::cross((v[v0]-v[v1]), (v[v1]-v[v2])));
-//                if(arma::dot(-v[v0], normal) >= 0) { // back-face culling
-//                    render_point rpts[3] = {
-//                        {x[v0], y[v0], v[v0], model.vts[fc.vts_id[0]], model.vns[fc.vns_id[0]]},
-//                        {x[v1], y[v1], v[v1], model.vts[fc.vts_id[i]], model.vns[fc.vns_id[i]]},
-//                        {x[v2], y[v2], v[v2], model.vts[fc.vts_id[i+1]], model.vns[fc.vns_id[i+1]]}
-//                    };
-//                    draw_textured_triangle(rpts, mtl, normal);
-//                }
-//            }
-
-            // v2
-            std::vector<render_point> poly;
-            for(unsigned i=0; i<vertex_count; i++) {
-                //qDebug("%u", i);
-                unsigned v_id = fc.vs_id[i],
-                         vt_id = fc.vts_id[i],
-                         vn_id = fc.vns_id[i];
-                poly.push_back({x[v_id], y[v_id], v[v_id], model.vts[vt_id], model.vns[vn_id]});
-                //qDebug("%f %f %f", v[v_id][0], v[v_id][1], v[v_id][2]);
-            }
-            clip_poly(poly);
-//            qDebug("poly size: %u", poly.size());
-//            for(unsigned i = 0; i < poly.size(); i++) {
-//                qDebug("%u, %u", poly[i].v.n_cols, poly[i].v.n_rows);
-//            }
-            int poly_size = poly.size();
-            if(poly[0].v[2] <= near) continue;
-            for(int i = 1; i < poly_size - 1; i++) {
-                if(poly[i].v[2] <= near || poly[i].v[i+1] <= near) continue;
-                arma::vec normal = arma::normalise(arma::cross((poly[0].v - poly[i].v), (poly[i].v - poly[i+1].v)));
-                if(arma::dot(-poly[0].v, normal) >= 0) { // back-face culling
-                    render_point rpts[3] = {poly[0], poly[i], poly[i+1]};
-                    draw_textured_triangle(rpts, mtl, normal);
-                }
-            }
-        }
-
-        delete [] v;
-        delete [] x;
-        delete [] y;
-        delete [] order;
-    }
-
-    // okręgi oznaczające źródło światła
-    for(unsigned i=0; i < world->lights.size(); i++) {
-        light_source& light = world->lights[i];
-        if(light.z < near || light.z > far) continue;
-
-        float x = ((light.x / light.z)) * x_mult;
-        float y = ((light.y / light.z)) * y_mult;
-
-        x += center_x;
-        y += center_y;
-
-        float r = 20 * (1 - (light.z - near) / float(far - near));
-        draw_ellipse(x, y, r, r, 0, 0xffffffff, 16);
-    }
-
-    //qDebug("calls: %u", calls);
-}
-*/
-
-void Renderer3D::render_v2(World* world) {
-    calls = 0;
-    this->world = world;
-    //qDebug("rendering");
-    pixBuf.clear();
-    pixBuf.clear_zbuf(far);
-
-    arma::mat viewport_transform = //matrix::clip_matrix(aspect, fov, near, far) *
-            //matrix::head_camera(world->cam);
-            matrix::anchored_camera(world->cam);
-
-     // obliczenie pozycji świateł
-    for(unsigned i=0; i<world->lights.size(); i++) {
-        light_source& light = world->lights[i];
-        arma::mat transform = viewport_transform;
-        if(light.parent) transform *= matrix::local_transform(*light.parent);
-        arma::vec pos = transform * arma::vec{{light.real_x}, {light.real_y}, {light.real_z}, {1}};
-        world->lights[i].x = pos[0];
-        world->lights[i].y = pos[1];
-        world->lights[i].z = pos[2];
-    }
 
     // malarz
-    unsigned model_count = world->models.size();
     unsigned* model_order = new unsigned[model_count];
     float* model_z = new float[model_count];
     for(unsigned i=0; i < model_count; i++) {
@@ -215,7 +81,7 @@ void Renderer3D::render_v2(World* world) {
         // transformacje
         for(unsigned i=1; i<total_vertices; i++) {
             v[i] = global_transform * arma::vec{{model.vs[i].x}, {model.vs[i].y}, {model.vs[i].z}, {1}};
-            v[i].shed_row(3); // do back-face cullingu
+            v[i].shed_row(3);
             // punkt na ekranie
             x[i] = ((v[i][0] / v[i][2])) * x_mult;
             y[i] = ((v[i][1] / v[i][2])) * y_mult;
@@ -224,26 +90,27 @@ void Renderer3D::render_v2(World* world) {
             y[i] += center_y;
         }
 
-        // "malarz"
         unsigned total_faces = model.fs.size();
-        float* fz = new float[total_faces];\
-        unsigned* order = new unsigned[total_faces];
-        for(unsigned f=0; f<total_faces; f++) {
-            order[f] = f;
-            face& fc = model.fs[f];
-            unsigned vertex_count = fc.size();
-            fz[f] = 0;
-            for(unsigned i=0; i<vertex_count; i++) {
-                fz[f] += v[fc.vs_id[i]][2];
-            }
-            fz[f] /= vertex_count;
-        }
-        std::sort(order, order + total_faces, Comp(fz));
-        delete [] fz;
+
+        // "malarz"
+//        float* fz = new float[total_faces];
+//        unsigned* order = new unsigned[total_faces];
+//        for(unsigned f=0; f<total_faces; f++) {
+//            order[f] = f;
+//            face& fc = model.fs[f];
+//            unsigned vertex_count = fc.size();
+//            fz[f] = 0;
+//            for(unsigned i=0; i<vertex_count; i++) {
+//                fz[f] += v[fc.vs_id[i]][2];
+//            }
+//            fz[f] /= vertex_count;
+//        }
+//        std::sort(order, order + total_faces, Comp(fz));
+//        delete [] fz;
 
         // rysowanie
         for(unsigned f=0; f<total_faces; f++) {
-            face& fc = model.fs[order[f]];
+            face& fc = model.fs[f];
             material& mtl = model.mtls[fc.mtl_id];
             unsigned vertex_count = fc.size();
 
@@ -255,9 +122,9 @@ void Renderer3D::render_v2(World* world) {
                 arma::vec normal = arma::normalise(arma::cross((v[v0]-v[v1]), (v[v1]-v[v2])));
                 if(arma::dot(-v[v0], normal) >= 0) { // back-face culling
                     render_point rpts[3] = {
-                        {x[v0], y[v0], v[v0], model.vts[fc.vts_id[0]], model.vns[fc.vns_id[0]]},
-                        {x[v1], y[v1], v[v1], model.vts[fc.vts_id[i]], model.vns[fc.vns_id[i]]},
-                        {x[v2], y[v2], v[v2], model.vts[fc.vts_id[i+1]], model.vns[fc.vns_id[i+1]]}
+                        {x[v0] + 0.5, y[v0] + 0.5, v[v0], model.vts[fc.vts_id[0]], model.vns[fc.vns_id[0]]},
+                        {x[v1] + 0.5, y[v1] + 0.5, v[v1], model.vts[fc.vts_id[i]], model.vns[fc.vns_id[i]]},
+                        {x[v2] + 0.5, y[v2] + 0.5, v[v2], model.vts[fc.vts_id[i+1]], model.vns[fc.vns_id[i+1]]}
                     };
                     draw_textured_triangle(rpts, mtl, normal);
                 }
@@ -271,7 +138,12 @@ void Renderer3D::render_v2(World* world) {
 //                         vn_id = fc.vns_id[i];
 //                poly.push_back({x[v_id], y[v_id], v[v_id], model.vts[vt_id], model.vns[vn_id]});
 //            }
-//            clip_poly(poly);
+//            for(int i=0; i<poly.size(); i++) { // do interpolacji
+//                poly[i].v[2] = 1.0 / poly[i].v[2];
+//                poly[i].vt.u *= poly[i].v[2];
+//                poly[i].vt.v *= poly[i].v[2];
+//            }
+//            //clip_poly(poly);
 //            int poly_size = poly.size();
 //            //if(poly[0].v[2] <= near) continue;
 //            for(int i = 1; i < poly_size - 1; i++) {
@@ -287,9 +159,9 @@ void Renderer3D::render_v2(World* world) {
         delete [] v;
         delete [] x;
         delete [] y;
-        delete [] order;
+//        delete [] order;
     }
-    delete [] model_order;
+//    delete [] model_order;
 
     // okręgi oznaczające źródło światła
     for(unsigned i=0; i < world->lights.size(); i++) {
@@ -313,8 +185,8 @@ void Renderer3D::draw_textured_triangle(render_point v[3], const material& mtl, 
 
     for(int i=0; i<3; i++) { // do interpolacji
         v[i].v[2] = 1.0 / v[i].v[2];
-        v[i].vt.u = v[i].vt.u * v[i].v[2];
-        v[i].vt.v = v[i].vt.v * v[i].v[2];
+        v[i].vt.u *= v[i].v[2];
+        v[i].vt.v *= v[i].v[2];
     }
 
     if(v[0].y < v[1].y){
@@ -354,8 +226,10 @@ void Renderer3D::draw_textured_triangle(render_point v[3], const material& mtl, 
 //    bresenham2d(v[0].x, v[0].y, v[1].x, v[1].y, 0xffffffff);
 //    bresenham2d(v[0].x, v[0].y, v[2].x, v[2].y, 0xffffffff);
 //    bresenham2d(v[2].x, v[2].y, v[1].x, v[1].y, 0xffffffff);
+//    bresenham3d(v[0], v[1], mtl, normal);
+//    bresenham3d(v[0], v[2], mtl, normal);
+//    bresenham3d(v[2], v[1], mtl, normal);
 }
-
 
 void Renderer3D::texture_top_tri(render_point v[3], const material& mtl, const arma::vec& normal) {
 
@@ -378,10 +252,10 @@ void Renderer3D::texture_top_tri(render_point v[3], const material& mtl, const a
           rdz = (top.v[2] - right.v[2]) / dy;
 
 
-    float middle_bound = left.y < 0 ? 0 : left.y;
-    float top_bound = top.y >= height-0.6 ? height-1.6 : top.y;
+    float middle_bound = (left.y < 0 ? 0 : left.y);
+    float top_bound = (top.y >= height-0.6 ? height-1.6 : top.y);
 
-    if(top_bound < 0) return;
+    if(top_bound < 0 || middle_bound >= height) return;
 
     float temp = middle_bound - left.y;
     lx += (temp) * ldx;
@@ -391,21 +265,22 @@ void Renderer3D::texture_top_tri(render_point v[3], const material& mtl, const a
 
     for(float y = middle_bound; y <= top_bound; y++) {
 
-        float a = (y - left.y) / dy;
+        float y_a = (y - left.y) / dy;
 
-        vertex_texture ltv = top.vt * a + left.vt * (1.0 - a);
-        vertex_texture rtv = top.vt * a + right.vt * (1.0 - a);
+        vertex_texture ltv = top.vt * y_a + left.vt * (1.0 - y_a);
+        vertex_texture rtv = top.vt * y_a + right.vt * (1.0 - y_a);
 
-        float left = lx < 0 ? 0 : lx,
-             right = rx >= width-0.6 ? width-1.6 : rx;
-        float reciprocal = 1.0 / float(rx - lx);
+        float left = (lx < 0 ? 0 : lx),
+              right = (rx >= width-0.6 ? width-1.6 : rx) + 0.5;
+        float x_rec = 1.0 / (rx - lx);
+        int iy = y + 0.5;
         for(float x = left; x <= right; x++) {
-            float alpha = (x - lx) * reciprocal;
-            float z = 1.0 / (lz * (1.0 - alpha) + rz * alpha);
-            int iy = y + 0.5, ix = x + 0.5;
+            float x_a = (x - lx) * x_rec;
+            float z = 1.0 / (lz * (1.0 - x_a) + rz * x_a);
+            int ix = x + 0.5;
             int i = iy * width + ix;
             if((z < pixBuf.z_buf[i]) && (z >= near)) {
-                vertex_texture vt = ltv * (1.0 - alpha) +  rtv * alpha;
+                vertex_texture vt = ltv * (1.0 - x_a) +  rtv * x_a;
                 float u = vt.u * z;
                 float v = vt.v * z;
                 if(u < 0)u = 0;
@@ -444,10 +319,10 @@ void Renderer3D::texture_bottom_tri(render_point v[3], const material& mtl, cons
     float ldz = (bottom.v[2] - left.v[2]) / dy,
           rdz = (bottom.v[2] - right.v[2]) / dy;
 
-    float middle_bound = left.y >= height-0.6 ? height-1.6 : left.y;
-    float bottom_bound = bottom.y < 0 ? 0 : bottom.y;
+    float middle_bound = (left.y >= height-0.6 ? height-1.6 : left.y);
+    float bottom_bound = (bottom.y < 0 ? 0 : bottom.y);
 
-    if(bottom_bound >= height-0.6) return;
+    if(bottom_bound >= height-0.6 || middle_bound < 0) return;
 
     float temp = left.y - middle_bound;
     lx += (temp) * ldx;
@@ -462,13 +337,14 @@ void Renderer3D::texture_bottom_tri(render_point v[3], const material& mtl, cons
         vertex_texture ltv = left.vt * (1 - a) + bottom.vt * a;
         vertex_texture rtv = right.vt * (1 - a) + bottom.vt * a;
 
-        float left = lx < 0 ? 0 : lx,
-             right = rx >= width-0.6 ? width-1.6 : rx;
-        float reciprocal = 1.0 / float(rx - lx);
+        float left = (lx < 0 ? 0 : lx) + 0.5,
+              right = (rx >= width-0.6 ? width-1.6 : rx) + 0.5;
+        float x_rec = 1.0 / float(rx - lx);
+        int iy = y + 0.5;
         for(float x = left; x <= right; x++) {
-            float alpha = (x - lx) * reciprocal;
+            float alpha = (x - lx) * x_rec;
             float z = 1.0 / (lz * (1 - alpha) + rz * alpha);
-            int iy = y + 0.5, ix = x + 0.5;
+            int ix = x + 0.5;
             int i = iy * width + ix;
             if((z < pixBuf.z_buf[i]) && (z >= near)) {
                 vertex_texture vt = ltv * (1.0 - alpha) +  rtv * alpha;
@@ -490,81 +366,30 @@ void Renderer3D::texture_bottom_tri(render_point v[3], const material& mtl, cons
 
     }
 }
-/*
-void Renderer3D::bresenham_tri_tex(render_point v[3], const material& mtl, const arma::vec& normal) {
 
-    bool lchanged = false;
-    bool rchanged = false;
-
-    int lx = v[1].x;
-    int ly = v[1].y;
-    int rx = v[2].x;
-    int ry = v[2].y;
-
-    int ldx = abs(ax - tx);
-    int ldy = abs(my - ty);
-    int rdx = abs(bx - tx);
-    int rdy = abs(my - ty);
-
-    int lsignx = sgn(ax - tx);
-    int rsignx = sgn(bx - tx);
-    int signy = sgn(my - ty);
-
-    if(ldy > ldx) {
-        std::swap(ldx, ldy);
-        lchanged = true;
-    }
-    if(rdy > rdx) {
-        std::swap(rdx, rdy);
-        rchanged = true;
-    }
-
-    int le = 2 * ldy - ldx;
-    int re = 2 * rdy - rdx;
-    //---------------------------------
-    float ldz = float(az - tz) / ldx;
-    float lz = tz;
-    float rdz = float(bz - tz) / rdx;
-    float rz = tz;
-    //---------------------------------
-    int li=0, ri=0;
-    //int y = ty;
-    int w = ly;
-    while(w > my) {
-        int y = ly;
-        while((y==ly)&&(li<ldx)){
-            uchar c = 0xff * (1.0 - lz / far);
-            uint32_t color = 0xff << 24 | c << 16 | c << 8 | c;
-            set_pixel(lx, ly, lz, color);
-            bresenham_next_pixel(lx, ly, ldx, ldy, lsignx, signy, le, lchanged);
-            //qDebug("l: %d, %d", lx, ly);
-            lz += ldz;
-            li++;
+inline void bresenham_next_pixel(int& x, int& y, int& dx, int& dy, int& signx, int& signy, int& e, bool changed) {
+    while (e >= 0) {
+        if(changed) {
+            x += signx;
+        } else {
+            y += signy;
         }
-        y = ry;
-        while((y==ry)&&(ri<rdx)) {
-            uchar c = 0xff * (1.0 - rz / far);
-            uint32_t color = 0xff << 24 | c << 16 | c << 8 | c;
-            set_pixel(rx, ry, rz, color);
-            bresenham_next_pixel(rx, ry, rdx, rdy, rsignx, signy, re, rchanged);
-            //qDebug("r: %d, %d", lx, ly);
-            ri++;
-            rz += rdz;
-        }
-        bresenham3d(lx, ly, lz, rx, ry, rz);
-        w--;
+        e -= 2 * dx;
     }
+    if(changed) {
+        y += signy;
+    } else {
+        x += signx;
+    }
+    e += 2 * dy;
 }
-*/
+
 uint32_t treshold(uint32_t v) {
     return v > 255 ? 255 : v;
 }
 
 uint32_t Renderer3D::calc_color(float x, float y, float z, float tu, float tv, const arma::vec& n, const material &mtl) {
-    //calls++;
-    // x, y to punkty na ekranie
-    // wektor n (normalny) musi być znormalizowany
-
+//    static int gamma = 8;
     if(world->lights.size()) {
         x -= center_x;
         y -= center_y;
@@ -597,7 +422,13 @@ uint32_t Renderer3D::calc_color(float x, float y, float z, float tu, float tv, c
 
                     float dot_rv = arma::dot(r, v);
                     if(dot_rv > 0) {
-                        specular = mtl.specular * std::pow(dot_rv, mtl.ns) * light.specular;
+//                        arma::vec c = arma::cross(r, v);
+//                        float lambda = arma::dot(c, c) / 2.0;//1 - dot_rv;
+//                        float beta = mtl.ns / gamma;
+                        specular = mtl.specular
+                                //* std::pow((1.0 - beta * lambda), gamma)
+                                * std::pow(dot_rv, mtl.ns)
+                                * light.specular;
                     }
                 }
 
@@ -634,6 +465,65 @@ void Renderer3D::draw_ellipse(int x, int y, double r1, double r2, double angle, 
         bresenham2d(cx, cy, px, py, color);
         px = cx;
         py = cy;
+    }
+}
+
+void Renderer3D::bresenham3d(render_point a, render_point b, const material& mtl, const arma::vec& normal) {
+
+    bool changed = false;
+    int x = a.x;
+    int y = a.y;
+
+    int dx = abs(b.x - a.x);
+    int dy = abs(b.y - a.y);
+
+    int signx = sgn(b.x - a.x);
+    int signy = sgn(b.y - a.y);
+
+    if(dy > dx) {
+        std::swap(dx, dy);
+        changed = true;
+    }
+
+    int e = 2 * dy - dx;
+    //---------------------------------
+    float dz = (b.v[2] - a.v[2]) / dx;
+    float z_rec = a.v[2];
+
+    float alpha = 0;
+    float dalpha = 1.0 / dx;
+    //---------------------------------
+    for(int i = 1; i <= dx; i++) {
+        int index = y * width + x;
+        float z = 1.0 / z_rec;
+        if(y >= 0 && y < height && x >= 0 && x < width) {
+            if(pixBuf.z_buf[index] > z) {
+                float u = (a.vt.u * (1 - alpha) + b.vt.u * alpha) * z,
+                      v = (a.vt.v * (1 - alpha) + b.vt.v * alpha) * z;
+                if(u > 1) u = 1;
+                if(v > 1) v = 1;
+                pixBuf.buf[index] = calc_color(x, y, z, u, v, normal, mtl);//0xff00ff00;//
+                pixBuf.z_buf[index] = z;
+            }
+        }
+        while (e >= 0) {
+            if(changed) {
+                x += signx;
+            } else {
+                y += signy;
+            }
+            e -= 2 * dx;
+        }
+        if(changed) {
+            y += signy;
+        } else {
+            x += signx;
+        }
+        e += 2 * dy;
+        //---------------------------------
+        z_rec += dz;
+        alpha += dalpha;
+        //---------------------------------
     }
 }
 
@@ -725,88 +615,6 @@ char Renderer3D::cohen_sutherland_clipping(int& x0, int& y0, int& x1, int& y1) {
     }
     return -1;
 }
-/*
-void PixBuf::fill_top_tri(int tx, int ty, int ax, int bx, int my, float tz, float az, float bz) {
-
-    bool lchanged = false;
-    bool rchanged = false;
-
-    int lx = tx;
-    int ly = ty;
-    int rx = tx;
-    int ry = ty;
-
-    int ldx = abs(ax - tx);
-    int ldy = abs(my - ty);
-    int rdx = abs(bx - tx);
-    int rdy = abs(my - ty);
-
-    int lsignx = sgn(ax - tx);
-    int rsignx = sgn(bx - tx);
-    int signy = sgn(my - ty);
-
-    if(ldy > ldx) {
-        std::swap(ldx, ldy);
-        lchanged = true;
-    }
-    if(rdy > rdx) {
-        std::swap(rdx, rdy);
-        rchanged = true;
-    }
-
-    int le = 2 * ldy - ldx;
-    int re = 2 * rdy - rdx;
-    //---------------------------------
-    float ldz = float(az - tz) / ldx;
-    float lz = tz;
-    float rdz = float(bz - tz) / rdx;
-    float rz = tz;
-    //---------------------------------
-    int li=0, ri=0;
-    //int y = ty;
-    int w = ly;
-    while(w > my) {
-        int y = ly;
-        while((y==ly)&&(li<ldx)){
-            uchar c = 0xff * (1.0 - lz / far);
-            uint32_t color = 0xff << 24 | c << 16 | c << 8 | c;
-            set_pixel(lx, ly, lz, color);
-            bresenham_next_pixel(lx, ly, ldx, ldy, lsignx, signy, le, lchanged);
-            //qDebug("l: %d, %d", lx, ly);
-            lz += ldz;
-            li++;
-        }
-        y = ry;
-        while((y==ry)&&(ri<rdx)) {
-            uchar c = 0xff * (1.0 - rz / far);
-            uint32_t color = 0xff << 24 | c << 16 | c << 8 | c;
-            set_pixel(rx, ry, rz, color);
-            bresenham_next_pixel(rx, ry, rdx, rdy, rsignx, signy, re, rchanged);
-            //qDebug("r: %d, %d", lx, ly);
-            ri++;
-            rz += rdz;
-        }
-        bresenham3d(lx, ly, lz, rx, ry, rz);
-        w--;
-    }
-}
-*/
-inline void bresenham_next_pixel(int& x, int& y, int& dx, int& dy, int& signx, int& signy, int& e, bool changed) {
-    while (e >= 0) {
-        if(changed) {
-            x += signx;
-        } else {
-            y += signy;
-        }
-        e -= 2 * dx;
-    }
-    if(changed) {
-        y += signy;
-    } else {
-        x += signx;
-    }
-    e += 2 * dy;
-}
 
 render_point intersection(render_point s, render_point e, vec2d a, vec2d b) {
     float d1 = ((b.y-a.y)*(e.x-s.x)-(e.y-s.y)*(b.x-a.x)),
@@ -836,6 +644,7 @@ void Renderer3D::clip_poly(std::vector<render_point>& poly) {
             int e_side = arma::vec(arma::cross(clipping_edge, arma::vec{{e.x - a.x}, {e.y - a. y}, {0}}))[2],
                 s_side = arma::vec(arma::cross(clipping_edge, arma::vec{{s.x - a.x}, {s.y - a. y}, {0}}))[2];
             if(e_side > 0) {
+
                 if(s_side < 0) {
                     poly.push_back(intersection(s, e, a, b));
                 }
@@ -847,3 +656,176 @@ void Renderer3D::clip_poly(std::vector<render_point>& poly) {
         }
     }
 }
+
+
+/*
+void Renderer3D::texture_tri(render_point v[3], const material& mtl, const arma::vec& normal) {
+
+    render_point top = v[0];
+    render_point left = v[1];
+    render_point right = v[2];
+
+    int dy = top.y - left.y;
+    int sign_y = sgn(dy);
+    dy *= sign_y;
+    if(!sign_y) return bresenham3d(v[1], v[2], mtl, normal); // jeśli trójkąt jest zdegenerowany to tylko pozioma linia
+
+
+    float lx = left.x,
+          rx = right.x;
+    float ldx = (top.x - left.x + sgn(top.x - left.x)) / dy,
+          rdx = (top.x - right.x + sgn(top.x - right.x)) / dy;
+
+    float lz = left.v[2],
+          rz = right.v[2];
+    float ldz = (top.v[2] - left.v[2]) / dy,
+          rdz = (top.v[2] - right.v[2]) / dy;
+
+    //
+    int middle_bound = left.y + 0.5;
+    int top_bound = top.y + 0.5;
+
+    if(((sign_y > 0) && (top_bound < 0 || middle_bound >= height))
+    || ((sign_y < 0) && (middle_bound < 0 || top_bound >= height))) return; // poza ekranem
+
+    if(middle_bound < 0) middle_bound = 0;
+    else if(middle_bound >= height)middle_bound = height - 1;
+    if(top_bound < 0) top_bound = 0;
+    else if(top_bound >= height)top_bound = height - 1;
+    //
+
+    float temp = middle_bound - left.y;
+    lx += (temp) * ldx;
+    rx += (temp) * rdx;
+    lz += (temp) * ldz;
+    rz += (temp) * rdz;
+
+    int y = middle_bound;
+    dy++;
+    for(int i=0; i < dy; i++) {
+
+        float a = std::abs(y - middle_bound) / float(dy);
+
+        vertex_texture ltv = top.vt * a + left.vt * (1.0 - a);
+        vertex_texture rtv = top.vt * a + right.vt * (1.0 - a);
+
+        int left = (lx < 0 ? 0 : lx) + 0.5,
+            right = (rx >= width-0.6 ? width-1.6 : rx) + 0.5;
+        int dx = rx - lx;
+        if(dx) {
+            float x_rec = 1.0 / float(dx);
+            for(int x = left; x <= right; x++) {
+                float alpha = float(x - lx) * x_rec;
+                float z = 1.0 / (lz * (1.0 - alpha) + rz * alpha);
+                int i = y * width + x;
+                if((z < pixBuf.z_buf[i]) && (z >= near)) {
+                    vertex_texture vt = (ltv * (1.0 - alpha) +  rtv * alpha) * z;
+                    float u = vt.u;
+                    float v = vt.v;
+                    if(u < 0)u = 0;
+                    if(u > 1)u = 1;
+                    if(v < 0)v = 0;
+                    if(v > 1)v = 1;
+                    pixBuf.buf[i] = calc_color(x, y, z, u, v, normal, mtl);
+                    pixBuf.z_buf[i] = z;
+                }
+            }
+        } else {
+            float z = 1 / lz;
+            int x = lx + 0.5;
+            int i = y * width + x;
+            if((z < pixBuf.z_buf[i]) && (z >= near)) {
+                vertex_texture vt = ltv * z;
+                float u = vt.u;
+                float v = vt.v;
+                pixBuf.buf[i] = calc_color(x, y, z, u, v, normal, mtl);
+                pixBuf.z_buf[i] = z;
+            }
+        }
+
+        lx += ldx;
+        rx += rdx;
+        lz += ldz;
+        rz += rdz;
+
+        y += sign_y;
+    }
+}
+*/
+
+/*
+void Renderer3D::bresenham_tri_tex(render_point v[3], const material& mtl, const arma::vec& normal) {
+
+    bool lchanged = false;
+    bool rchanged = false;
+
+    int tx = v[0].x + 0.5;
+    int ty = v[0].y + 0.5;
+    int lx = v[1].x + 0.5;
+    int ly = v[1].y + 0.5;
+    int rx = v[2].x + 0.5;
+    int ry = v[2].y + 0.5;
+
+    int ldx = abs(lx - tx);
+    int ldy = abs(ly - ty);
+    int rdx = abs(rx - tx);
+    int rdy = abs(ry - ty);
+
+    int lsignx = sgn(tx - lx);
+    int rsignx = sgn(tx - rx);
+    int signy = sgn(ty - ly);
+
+    if(ldy > ldx) {
+        std::swap(ldx, ldy);
+        lchanged = true;
+    }
+    if(rdy > rdx) {
+        std::swap(rdx, rdy);
+        rchanged = true;
+    }
+
+    int le = 2 * ldy - ldx;
+    int re = 2 * rdy - rdx;
+    //---------------------------------
+    float ldz = float(v[1].v[2] - v[0].v[2]) / ldx;
+    float lz = v[0].v[2];
+    float rdz = float(v[2].v[2] - v[0].v[2]) / rdx;
+    float rz = v[0].v[2];
+
+//    float lu = v[1].vt.u,
+//          lv = v[1].vt.v,
+//          ru = v[2].vt.u,
+//          rv = v[2].vt.v;
+    //---------------------------------
+    int li=0, ri=0;
+    //int y = ty;
+    int y = ly;
+    int w = ly;
+//    qDebug("from: %d to: %d", ly, ty);
+    while(signy < 0 ? w >= ty : w <= ty) {
+
+        while((y==ly)&&(li<ldx)){
+            bresenham_next_pixel(lx, ly, ldx, ldy, lsignx, signy, le, lchanged);
+            lz += ldz;
+            li++;
+        }
+        while((y==ry)&&(ri<rdx)) {
+            bresenham_next_pixel(rx, ry, rdx, rdy, rsignx, signy, re, rchanged);
+            ri++;
+            rz += rdz;
+        }
+        // scanline
+        float a = 0,
+              da = 1.0 / float(rx - lx + 1);
+        for(int x = lx; x <= rx; x++) {
+            float z = 1.0/(lz * (1 - a) + rz * a);
+            //float u =
+            pixBuf.buf[y*width + x] = 0xffffffff;
+            a += da;
+        }
+        y = ly;
+        signy < 0 ? w-- : w++;
+//        qDebug("y: %d, w: %d", y, w);
+    }
+}
+*/

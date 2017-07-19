@@ -27,23 +27,26 @@ void World::load_model_from_file(const std::string &filename) {
 void World::load_assets()
 {
     std::vector<std::string> filename = {
+        "table lamp.obj",
         //"Handgun_obj.obj"
         //"Street environment_V01.obj"
         //,"cube.obj"
-        //"oildrum.obj"
-        //"amg.obj"
-        //"tree_oak.obj"
-        "table lamp.obj",
-        "chair.obj",
-        "table.obj",
-        //"cube.obj"
+        "oildrum.obj"
+
+        //"chair.obj",
+       // "table.obj",
     };
 
     std::unordered_map<std::string, float> scale;
     scale["table lamp.obj"] = 1;
+    scale["oildrum.obj"] = 100;
     scale["chair.obj"] = 50;
+    scale["chair2.obj"] = 1.0/8;
     scale["table.obj"] = 50;
     scale["cube.obj"] = 500;
+    scale["desk2.obj"] = 20;
+    scale["ModernDeskOBJ.obj"] = 2;
+    scale["fruit stand.obj"] = 1.0/50;
 
     for(unsigned i=0; i< filename.size(); i++) {
         load_model_from_file(filename[i]);

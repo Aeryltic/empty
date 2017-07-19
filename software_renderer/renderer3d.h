@@ -47,6 +47,8 @@ private:
     void clip_poly(std::vector<render_point> &poly);
 
     void bresenham_tri_tex(render_point v[3], const material& mtl, const arma::vec& normal);
+    void bresenham3d(render_point a, render_point b, const material &mtl, const arma::vec &normal);
+    void texture_tri(render_point v[], const material &mtl, const arma::vec &normal);
 };
 
 #endif // RENDERER3D_H

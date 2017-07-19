@@ -7,7 +7,7 @@
 #include "world.h"
 #include "renderer3d.h"
 
-using namespace std;
+//using namespace std;
 class Ekran : public QWidget
 {
     Q_OBJECT
