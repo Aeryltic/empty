@@ -30,17 +30,19 @@ void World::load_assets()
         //"Handgun_obj.obj"
         //"Street environment_V01.obj"
         //,"cube.obj"
-        //"oildrum.obj"
+        "table lamp.obj",
+        "oildrum.obj"
         //"amg.obj"
         //"tree_oak.obj"
-        "table lamp.obj",
-        "chair.obj",
-        "table.obj",
+
+        //"chair.obj",
+        //"table.obj",
         //"cube.obj"
     };
 
     std::unordered_map<std::string, float> scale;
     scale["table lamp.obj"] = 1;
+    scale["oildrum.obj"] = 150;
     scale["chair.obj"] = 50;
     scale["table.obj"] = 50;
     scale["cube.obj"] = 500;
@@ -55,7 +57,7 @@ void World::load_assets()
         }
     }
 
-    lights.push_back(light_source(30, 70, 0, rgb(1, 1, 1), rgb(1, 1 ,1), rgb(1, 1, 1), &models[0]));
+    lights.push_back(point_light(30, 70, 0, rgb(1, 1, 1), rgb(1, 1 ,1), rgb(1, 1, 1), &models[0]));
     //lights.push_back(light_source(0, -200, 0, rgb(1, 1, 1), rgb(0, 1, 0), rgb(1.0, 1.0, 1.0)));
     //lights.push_back(light_source(0, 200, 0, rgb(1, 1, 1), rgb(0, 0, 1), rgb(1.0, 1.0, 1.0)));
 

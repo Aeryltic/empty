@@ -8,7 +8,7 @@
 struct World{
     camera cam;
     std::vector<model3d> models;
-    std::vector<light_source> lights;
+    std::vector<point_light> lights;
 
 
     World();

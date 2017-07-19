@@ -30,6 +30,10 @@ MainWindow::MainWindow(World* world, QWidget *parent) :
     connect((ui->lightB), &QSlider::valueChanged, [=](){ set_l_b(ui->lightB->value()); });
     connect((ui->lightC), &QSlider::valueChanged, [=](){ set_l_c(ui->lightC->value()); });
 
+    connect((ui->lightLR), &QSlider::valueChanged, [=](){ set_l_lr(ui->lightLR->value()); });
+    connect((ui->lightLG), &QSlider::valueChanged, [=](){ set_l_lg(ui->lightLG->value()); });
+    connect((ui->lightLB), &QSlider::valueChanged, [=](){ set_l_lb(ui->lightLB->value()); });
+
     model_nr = 0;
     ui->nrSlider->setMaximum(world->models.size());
 

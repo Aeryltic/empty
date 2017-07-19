@@ -1,6 +1,6 @@
 #include "light_source.h"
 
-light_source::light_source(float x, float y, float z, rgb a, rgb d, rgb s, model3d *parent) {
+point_light::point_light(float x, float y, float z, rgb a, rgb d, rgb s, model3d *parent) {
     this->real_x = x;
     this->real_y = y;
     this->real_z = z;

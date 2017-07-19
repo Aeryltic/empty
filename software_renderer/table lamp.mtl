@@ -14,8 +14,8 @@ map_Ka textures\\OBJ_Table_Lamp_D.png
 
 newmtl light_bulb
 Ns 96.078431
-Ke 10 10 10
-Ka 1 1 1
+Ke 2 2 2
+Ka 10 10 10
 Kd 0 0 0
 Ks 0 0 0
 Ni 1.000000

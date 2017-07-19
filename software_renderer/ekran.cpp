@@ -9,7 +9,7 @@
 #include <stack>
 
 using namespace std;
-Ekran::Ekran(QWidget *parent) : QWidget(parent), width(1280), height(720), renderer(width, height, 0xff000000) {
+Ekran::Ekran(QWidget *parent) : QWidget(parent), width(1280), height(720), renderer(width, height, 0xff111111) {
     pressed = false;
     world = nullptr;
 }

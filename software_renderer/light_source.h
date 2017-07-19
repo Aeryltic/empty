@@ -4,7 +4,7 @@
 #include "structures.h"
 #include "model3d.h"
 
-struct light_source {
+struct point_light {
     float real_x, real_y, real_z; // rzeczywiste pozycje (lub wzgl parenta)
     float x, y, z; // wzgl kamery
 
@@ -21,10 +21,10 @@ struct light_source {
 
     model3d* parent;
 
-    light_source(float x, float y, float z, rgb a, rgb d, rgb s, model3d* parent = nullptr);//, float radius);
+    point_light(float x, float y, float z, rgb a, rgb d, rgb s, model3d* parent = nullptr);//, float radius);
 };
 
-struct inf_light_source {
+struct directional_light {
     float ray_x, ray_y, ray_z;
     float x, y, z;
 

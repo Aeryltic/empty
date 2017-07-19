@@ -41,6 +41,10 @@ private:
     void set_l_b(float v){ if(world->lights.size()) world->lights[0].att_b = std::pow(1.0 / v, 2); update(); }
     void set_l_c(float v){ if(world->lights.size()) world->lights[0].att_c = std::pow(1.0 / v, 3); update(); }
 
+    void set_l_lr(float v){ if(world->lights.size()) world->lights[0].ambient.r = world->lights[0].diffuse.r = world->lights[0].specular.r = v/100; update(); }
+    void set_l_lg(float v){ if(world->lights.size()) world->lights[0].ambient.g = world->lights[0].diffuse.g = world->lights[0].specular.g = v/100; update(); }
+    void set_l_lb(float v){ if(world->lights.size()) world->lights[0].ambient.b = world->lights[0].diffuse.b = world->lights[0].specular.b = v/100; update(); }
+
     void set_model_nr(int n){ this->model_nr = n; update(); }
 
     void keyPressEvent(QKeyEvent* event);
